@@ -88,6 +88,34 @@ Retrieves comprehensive booking information by joining bookings with customer an
 
 **Output:** Displays booking_id, customer_name, vehicle_name, booking_rental_start_date, booking_rental_end_date, and booking_status
 
+**SQL Query:**
+
+```sql
+SELECT
+    b.booking_id,
+    u.user_name AS customer_name,
+    v.vehicle_name AS vehicle_name,
+    b.booking_rental_start_date,
+    b.booking_rental_end_date,
+    b.booking_status
+FROM
+    Bookings AS b
+INNER JOIN
+    Users AS u ON b.user_id = u.user_id
+INNER JOIN
+    Vehicles AS v ON b.vehicle_id = v.vehicle_id;
+```
+
+**Explanation:**
+This query demonstrates the use of INNER JOIN to combine data from three tables:
+
+- Uses aliases (b, u, v) for cleaner code
+- Joins Bookings with Users table on user_id to get customer information
+- Joins Bookings with Vehicles table on vehicle_id to get vehicle details
+- Returns a comprehensive view of all bookings with customer names and vehicle information
+
+---
+
 ### Query 2: EXISTS Clause
 
 Identifies vehicles that have never been booked, useful for inventory analysis.
@@ -95,6 +123,31 @@ Identifies vehicles that have never been booked, useful for inventory analysis.
 **Concepts Used:** NOT EXISTS
 
 **Output:** Lists all vehicles with no booking history
+
+**SQL Query:**
+
+```sql
+SELECT
+    *
+FROM
+    Vehicles AS v
+WHERE
+    NOT EXISTS (
+        SELECT 1
+        FROM Bookings AS b
+        WHERE b.vehicle_id = v.vehicle_id
+    );
+```
+
+**Explanation:**
+This query uses the NOT EXISTS clause to find unused inventory:
+
+- Selects all columns from the Vehicles table
+- The subquery checks if any bookings exist for each vehicle
+- NOT EXISTS returns true only when no matching bookings are found
+- Useful for identifying vehicles that may need marketing or pricing adjustments
+
+---
 
 ### Query 3: WHERE Clause
 
@@ -104,6 +157,29 @@ Filters and retrieves available vehicles of a specific type (e.g., cars).
 
 **Output:** Shows available vehicles where vehicle_type is 'car' and vehicle_availability_status is 'available'
 
+**SQL Query:**
+
+```sql
+SELECT
+    *
+FROM
+    Vehicles
+WHERE
+    vehicle_type = 'car'
+    AND vehicle_availability_status = 'available';
+```
+
+**Explanation:**
+This query demonstrates basic filtering with WHERE clause:
+
+- Retrieves all columns from Vehicles table
+- Applies two conditions using AND operator
+- Filters for vehicles of type 'car'
+- Only shows vehicles with 'available' status
+- Practical for customer-facing vehicle search functionality
+
+---
+
 ### Query 4: Aggregation with Filtering
 
 Analyzes booking patterns by finding vehicles with high demand (more than 2 bookings).
@@ -111,5 +187,31 @@ Analyzes booking patterns by finding vehicles with high demand (more than 2 book
 **Concepts Used:** GROUP BY, HAVING, COUNT
 
 **Output:** Displays vehicle_name and total_bookings for vehicles with more than 2 bookings
+
+**SQL Query:**
+
+```sql
+SELECT
+    v.vehicle_name AS vehicle_name,
+    COUNT(b.booking_id) AS total_bookings
+FROM
+    Vehicles AS v
+INNER JOIN
+    Bookings AS b ON v.vehicle_id = b.vehicle_id
+GROUP BY
+    v.vehicle_id, v.vehicle_name
+HAVING
+    COUNT(b.booking_id) > 2;
+```
+
+**Explanation:**
+This query demonstrates aggregation functions and filtering on aggregated data:
+
+- Joins Vehicles and Bookings tables to count bookings per vehicle
+- GROUP BY groups results by vehicle (using both vehicle_id and vehicle_name)
+- COUNT() aggregate function counts the number of bookings for each vehicle
+- HAVING clause filters groups after aggregation (unlike WHERE which filters before)
+- Returns only vehicles with more than 2 bookings
+- Useful for identifying popular vehicles and demand patterns
 
 ---
